@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--命名空间指向对应的接口-->
+<mapper namespace="net.wanho.mapper.PersonMapper">
+
+
+    <select id="getPersonCardInfo" resultType="net.wanho.pojo.PersonDto">
+            SELECT
+                p.pname,c.info
+            FROM
+                person p
+            LEFT JOIN card c ON p.cid = c.cid
+    </select>
+
+
+    <resultMap id="PersonDtoMap" type="Person">
+        <id column="pid" property="pid"/>
+        <result column="pname" property="pname"/>
+        <!--一对一-->
+        <association property="card" javaType="Card">
+            <id column="cid" property="cid"/>
+            <result column="info" property="info"/>
+        </association>
+    </resultMap>
+
+
+    <select id="getPersonCardInfo2" resultMap="PersonDtoMap">
+            SELECT
+                p.pname,c.info
+            FROM
+                person p
+            LEFT JOIN card c ON p.cid = c.cid
+    </select>
+
+
+    <resultMap id="PersonDtoMap2" type="Person">
+        <id column="pid" property="pid"/>
+        <result column="pname" property="pname"/>
+        <result column="cid" property="cid"/>
+        <!--一对一-->
+        <association property="card" javaType="Card" select="selectCard" column="cid">
+
+        </association>
+    </resultMap>
+
+    <select id="getPersonCardInfo3" resultMap="PersonDtoMap2">
+        SELECT  * FROM person
+    </select>
+
+    <select id="selectCard" resultType="Card">
+        SELECT * FROM card WHERE cid=#{cid}
+    </select>
+
+
+    <resultMap id="personAddressMap" type="Person">
+        <id column="pid" property="pid"/>
+        <result column="pname" property="pname"/>
+        <collection property="addresses" javaType="java.util.List"  ofType="Address">
+            <id column="aid" property="aid"/>
+            <result column="aname" property="aname"/>
+        </collection>
+    </resultMap>
+
+    <select id="getPersonAddress" resultMap="personAddressMap">
+            SELECT
+                *
+            FROM
+                person p
+            LEFT JOIN address a ON p.pid = a.apid
+    </select>
+
+    <resultMap id="personAddressMap2" type="Person">
+        <id column="pid" property="pid"/>
+        <result column="pname" property="pname"/>
+        <collection property="addresses" javaType="java.util.List"  ofType="Address" select="selectAddress" column="pid">
+
+        </collection>
+    </resultMap>
+
+    <select id="getPersonAddress2" resultMap="personAddressMap2">
+
+        SELECT  * FROM person
+
+    </select>
+
+    <select id="selectAddress" resultType="Address">
+        SELECT  * FROM address WHERE  pid=#{pid}
+    </select>
+
+    <resultMap id="personScoreMap" type="Person">
+        <id column="pid" property="pid"/>
+        <result column="pname" property="pname"/>
+       <collection property="scores" javaType="java.util.List" ofType="Score">
+           <result column="sc_id" property="scId"/>
+           <result column="sc_name" property="scName"/>
+       </collection>
+    </resultMap>
+
+
+    <select id="getPersonScore" resultMap="personScoreMap">
+        SELECT
+            p.*,s.*
+        FROM
+            person p
+        LEFT JOIN person_score ps ON p.pid = ps.p_id
+        LEFT JOIN score s ON s.sc_id = ps.sc_id
+    </select>
+
+    <resultMap id="personScoreMap2" type="Person">
+        <id column="pid" property="pid"/>
+        <result column="pname" property="pname"/>
+        <collection property="scores" javaType="java.util.List" ofType="Score" select="selectScore" column="pid">
+
+        </collection>
+    </resultMap>
+    <select id="getPersonScore2" resultMap="personScoreMap2">
+        SELECT  * FROM  person
+    </select>
+
+    <select id="selectScore" resultType="Score">
+        SELECT
+            s.*
+        FROM
+            score s
+        LEFT JOIN person_score ps ON s.sc_id = ps.sc_id
+        WHERE
+            ps.p_id =#{pid}
+    </select>
+
+   <resultMap id="scorePersonAddressMap" type="Score">
+       <id column="sc_id" property="scId"/>
+       <result column="sc_name" property="scName"/>
+       <collection property="personList" javaType="java.util.List" ofType="Person" column="sc_id" select="selectPerson"/>
+   </resultMap>
+
+    <resultMap id="personAddress" type="Person">
+        <id column="pid" property="pid"/>
+        <result column="pname" property="pname"/>
+        <collection property="addresses" javaType="java.util.List" ofType="Address" select="selAddress" column="pid"/>
+    </resultMap>
+
+
+
+    <select id="getScorePersonAddress" resultMap="scorePersonAddressMap">
+        SELECT * FROM  score
+
+    </select>
+
+    <select id="selectPerson" resultMap="personAddress">
+            SELECT
+                p.*
+            FROM
+                person p
+            LEFT JOIN person_score ps ON p.pid= ps.p_id
+            WHERE
+                ps.sc_id=#{sc_id}
+    </select>
+
+    <select id="selAddress" resultType="Address">
+
+        SELECT * FROM address WHERE pid=#{pid}
+
+    </select>
+
+
+</mapper>

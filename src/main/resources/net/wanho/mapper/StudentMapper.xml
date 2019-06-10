@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--命名空间指向对应的接口-->
+<mapper namespace="net.wanho.mapper.StudentMapper">
+
+    <!--定义代码片段-->
+    <sql id="sql_part">
+        id,sname,age,gender,address
+    </sql>
+    
+    
+    
+    <insert id="insertStuBatch">
+        INSERT INTO student VALUES
+
+        <foreach collection="list" index="index" item="item" separator=",">
+            (null,#{item.sname},#{item.age},#{item.gender},#{item.address})
+        </foreach>
+
+
+
+    </insert>
+
+
+    <select id="getStuByConditionIf" resultType="net.wanho.pojo.Student">
+
+        SELECT  <include refid="sql_part"/> FROM student  WHERE 1=1
+
+        <if test="sname!=null">
+           AND sname LIKE concat("%",#{sname},"%")
+        </if>
+        <if test="age!=null">
+           and age=#{age}
+        </if>
+    </select>
+
+    <select id="getStuByConditionChoose" resultType="net.wanho.pojo.Student">
+
+        SELECT  * FROM student  WHERE 1=1
+
+        <choose>
+            <when test="sname!=null">
+                AND sname LIKE concat("%",#{sname},"%")
+            </when>
+            <when test="age!=null">
+                and age=#{age}
+            </when>
+            <otherwise>
+                and address="南京"
+            </otherwise>
+
+        </choose>
+
+
+
+    </select>
+    <select id="getStuByConditionWhere" resultType="net.wanho.pojo.Student">
+        SELECT  * FROM student
+        <where>
+            <if test="sname!=null">
+                AND sname LIKE concat("%",#{sname},"%")
+            </if>
+            <if test="age!=null">
+                and age=#{age}
+            </if>
+        </where>
+
+    </select>
+
+   <select id="getStuByConditionTrim" resultType="net.wanho.pojo.Student">
+         SELECT  * FROM student
+       <!-- prefix表示第一个条件前面加上where  删除第一个条件的and|or -->
+         <trim prefix="where" prefixOverrides="and|or">
+             <if test="sname!=null">
+                 AND sname LIKE concat("%",#{sname},"%")
+             </if>
+             <if test="age!=null">
+                 and age=#{age}
+             </if>
+         </trim>
+    </select>
+
+    <select id="getStuByConditionForeach" resultType="net.wanho.pojo.Student">
+        select * from student
+        <if test="list!=null and list.size>0">
+            WHERE  id IN
+            <!--
+            collection  集合类型
+            index       下标
+            item        当前的对象
+            open        前缀
+            close       后缀
+            separator   分隔符
+             -->
+            <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+
+        </if>
+    </select>
+
+    <select id="getStuByConditionForeach2" resultType="net.wanho.pojo.Student">
+        select * from student
+        <if test="array!=null and array.length>0">
+            WHERE  id IN
+            <!--
+            collection  集合类型
+            index       下标
+            item        当前的对象
+            open        前缀
+            close       后缀
+            separator   分隔符
+             -->
+            <foreach collection="array" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+
+        </if>
+
+    </select>
+    <select id="getStuByConditionForeach3" resultType="net.wanho.pojo.Student">
+        select * from student
+        <if test="ids!=null and ids.length>0">
+            WHERE  id IN
+            <!--
+            collection  集合类型
+            index       下标
+            item        当前的对象
+            open        前缀
+            close       后缀
+            separator   分隔符
+             -->
+            <foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+
+        </if>
+
+
+
+    </select>
+
+    <update id="updateStuByConditionSet">
+        UPDATE student
+        <!-- set  最后一个条件去掉 , -->
+        <set>
+            <if test="sname!=null">
+                sname=#{sname},
+            </if>
+            <if test="age!=null">
+                age=#{age},
+            </if>
+        </set>
+        where id=#{id}
+
+
+    </update>
+</mapper>
